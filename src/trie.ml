@@ -73,10 +73,11 @@ module Make (M : M) = struct
     | [], Node (Some v,_) -> v
     | x::r, Node (_,m)    -> find r (M.find x m)
 
-  let rec mem l t = match (l,t) with
-    | [], Node (None,_)   -> false
-    | [], Node (Some _,_) -> true
-    | x::r, Node (_,m)    -> try mem r (M.find x m) with Not_found -> false
+  let mem l t =
+    try
+      ignore (find l t);
+      true
+    with Not_found -> false
 
   (*s Insertion is more subtle. When the final node is reached, we just
       put the information ([Some v]). Otherwise, we have to insert the
