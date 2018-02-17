@@ -1,0 +1,13 @@
+(jbuild_version 1)
+
+(executables
+ ((names (test_trie))
+  (modules (test_trie))
+  (libraries (trie oUnit))))
+
+(alias
+ ((name runtest)
+  (deps (test_trie.exe))
+ (action
+  (chdir ${ROOT}/../..
+   (run ${<})))))

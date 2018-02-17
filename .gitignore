@@ -1,3 +1,5 @@
 /_build
+/_coverage
+*.out
 .merlin
 trie.install
