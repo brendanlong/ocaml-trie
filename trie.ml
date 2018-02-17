@@ -132,7 +132,7 @@ module Make (M : S) = struct
     in
     traverse [] t
 
-  let rec fold f t acc =
+  let fold f t acc =
     let rec traverse revp t acc = match t with
       | Node (None,m) ->
           M.fold (fun x -> traverse (x::revp)) m acc

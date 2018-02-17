@@ -1,0 +1,6 @@
+(jbuild_version 1)
+
+(library
+ ((name trie)
+  (public_name trie)
+  (preprocess (pps (bisect_ppx -conditional)))))
