@@ -11,13 +11,21 @@ let trie_of_key_value_list (type a) : (CharTrie.key * a) list -> a CharTrie.t =
       CharTrie.add key value acc)
       CharTrie.empty l
 
-let trie_key =
-  QCheck.(list_of_size (Gen.int_range 1 10) char)
+let trie_key_with_size max =
+  QCheck.(list_of_size (Gen.int_bound max) char)
+
+let trie_key = trie_key_with_size 10
+
+let medium_list x =
+  QCheck.(list_of_size (Gen.int_bound 100) x)
+
+let list_values_are_unique l =
+  List.length (List.sort_uniq compare l) = List.length l
 
 let assume_unique_keys (type a) : (CharTrie.key * a) list -> unit =
   fun kv_list ->
     let keys = List.map fst kv_list in
-    QCheck.assume (List.length (List.sort_uniq compare keys) = List.length keys)
+    QCheck.assume (list_values_are_unique keys)
 
 let suite =
   let open QCheck in
@@ -200,7 +208,86 @@ let suite =
       List.map snd kv_list
       |> List.sort compare
     in
-    expect = actual) ]
+    expect = actual)
+
+  ; Test.make ~name:"find_approximate finds nothing in empty trie"
+    (pair trie_key small_int) (fun (key, max_differences) ->
+    CharTrie.(find_approximate ~max_differences key empty) = [])
+
+  ; Test.make ~name:"find_approximate ~max_differences:0 = find"
+    (list (pair trie_key int)) (fun kv_list ->
+    assume_unique_keys kv_list;
+    let trie = trie_of_key_value_list kv_list in
+    List.for_all (fun (key, value) ->
+      CharTrie.find_approximate ~max_differences:0 key trie = [value])
+      kv_list)
+
+  ; Test.make ~name:"find_approximate >= find"
+    (pair (medium_list (pair trie_key int)) (int_bound 5))
+    (fun (kv_list, max_differences) ->
+      assume_unique_keys kv_list;
+      let trie = trie_of_key_value_list kv_list in
+      List.for_all (fun (key, value) ->
+        let found = CharTrie.find_approximate ~max_differences key trie in
+        List.mem value found)
+        kv_list)
+
+  ; Test.make ~name:"find_approximate missing prefix"
+    (pair (medium_list (trie_key_with_size 6)) (int_range 1 5))
+    (fun (key_list, drop_prefix) ->
+      List.iter (fun key -> assume (List.length key >= drop_prefix)) key_list;
+      let kv_list = List.map (fun key -> key, key) key_list in
+      assume_unique_keys kv_list;
+      let trie = trie_of_key_value_list kv_list in
+      List.for_all (fun (key, value) ->
+        let key = 
+          let a = Array.of_list key in
+          Array.sub a drop_prefix ((Array.length a) - drop_prefix)
+          |> Array.to_list
+        in
+        let found = CharTrie.find_approximate ~max_differences:drop_prefix key
+            trie in
+        List.mem value found)
+        kv_list)
+
+  ; Test.make ~name:"find_approximate missing suffix"
+    (pair (medium_list (trie_key_with_size 6)) (int_range 1 5))
+    (fun (key_list, drop_prefix) ->
+      List.iter (fun key -> assume (List.length key >= drop_prefix)) key_list;
+      let kv_list = List.map (fun key -> key, key) key_list in
+      assume_unique_keys kv_list;
+      let trie = trie_of_key_value_list kv_list in
+      List.for_all (fun (key, value) ->
+        let key =
+          let a = Array.of_list key in
+          Array.sub a 0 ((Array.length a) - drop_prefix)
+          |> Array.to_list
+        in
+        let found = CharTrie.find_approximate ~max_differences:drop_prefix key
+            trie in
+        List.mem value found)
+        kv_list)
+
+  ; Test.make ~name:"find_approximate random changes"
+    (pair (medium_list (trie_key_with_size 6))
+       (list_of_size (Gen.int_range 0 5) (int_range 0 4)))
+    (fun (key_list, change_indexes) ->
+      let kv_list = List.map (fun key -> key, key) key_list in
+      assume_unique_keys kv_list;
+      let max_differences = List.length change_indexes in
+      let trie = trie_of_key_value_list kv_list in
+      List.for_all (fun (key, value) ->
+        let key =
+          let a = Array.of_list key in
+          List.iter (fun i ->
+            assume (Array.length a > i);
+            Array.set a i 'x')
+            change_indexes;
+          Array.to_list a
+        in
+        let found = CharTrie.find_approximate ~max_differences key trie in
+        List.mem value found)
+        kv_list) ]
 
 let () =
   QCheck_runner.run_tests_main suite

@@ -44,6 +44,7 @@ module type S = sig
   val mapi : (key -> 'a -> 'b) -> 'a t -> 'b t
   val keys : 'a t -> key list
   val data : 'a t -> 'a list
+  val find_approximate : max_differences:int -> key -> 'a t -> 'a list
 end
 
 module Make (M : M) = struct
@@ -168,4 +169,36 @@ module Make (M : M) = struct
   let data t =
     fold (fun _ value acc -> value :: acc) t []
     |> List.rev
+
+  let rec find_approximate ~max_differences key t =
+    assert (max_differences >= 0);
+    let with_difference f =
+      if max_differences = 0 then []
+      else f ~max_differences:(max_differences - 1)
+    in
+    match key, t with
+    | [], Node (value, links) ->
+      let rest = 
+        with_difference (fun ~max_differences ->
+          M.fold (fun _ next acc ->
+            find_approximate ~max_differences [] next @ acc)
+            links [])
+      in
+      (match value with
+      | Some value -> value :: rest
+      | None -> rest)
+    | current_key :: remaining_key, Node (_, links) ->
+      with_difference (find_approximate remaining_key t)
+      |> M.fold (fun link_key next acc ->
+        let max_differences =
+          if link_key = current_key
+          then max_differences
+          else max_differences - 1
+        in
+        if max_differences >= 0 then
+          find_approximate ~max_differences remaining_key next
+          @ find_approximate ~max_differences key next
+          @ acc
+        else acc)
+        links
 end

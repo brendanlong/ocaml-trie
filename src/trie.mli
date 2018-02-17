@@ -39,6 +39,7 @@ module type S = sig
   val mapi : (key -> 'a -> 'b) -> 'a t -> 'b t
   val keys : 'a t -> key list
   val data : 'a t -> 'a list
+  val find_approximate : max_differences:int -> key -> 'a t -> 'a list
 end
 
 module Make(M : M) : (S with type key = M.key list)
