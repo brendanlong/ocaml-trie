@@ -1,0 +1,6 @@
+(jbuild_version 1)
+
+(executables
+ ((names (bench_trie))
+  (modules (bench_trie))
+  (libraries (trie core_bench qcheck))))

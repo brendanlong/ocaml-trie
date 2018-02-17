@@ -1,6 +1,10 @@
 build:
 	@jbuilder build @install --dev
 
+benchmark:
+	@jbuilder build bench/bench_trie.exe
+	@_build/default/bench/bench_trie.exe -quota 1
+
 clean:
 	@jbuilder clean
 	@rm -rf _coverage bisect*.out
@@ -13,4 +17,4 @@ coverage: clean
 test:
 	@jbuilder runtest --dev
 
-.PHONY: build clean coverage test
+.PHONY: benchmark build clean coverage test
