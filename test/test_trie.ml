@@ -137,7 +137,7 @@ let suite =
     let l = List.sort compare !l in
     List.sort compare kv_list = l)
 
-  ; Test.make ~name:"Trie.map add int"
+  ; Test.make ~name:"map add int"
     (pair (list (pair trie_key int)) small_int) (fun (kv_list, n) ->
     assume_unique_keys kv_list;
     let actual =
@@ -155,7 +155,7 @@ let suite =
     in
     expect = actual)
 
-  ; Test.make ~name:"Trie.mapi minus key len"
+  ; Test.make ~name:"mapi minus key len"
     (list (pair trie_key int)) (fun kv_list ->
     assume_unique_keys kv_list;
     let actual =
@@ -170,6 +170,34 @@ let suite =
     in
     let expect =
       List.map (fun (k, v) -> k, v - List.length k) kv_list
+      |> List.sort compare
+    in
+    expect = actual)
+
+  ; Test.make ~name:"keys"
+    (list (pair trie_key int)) (fun kv_list ->
+    assume_unique_keys kv_list;
+    let actual =
+      trie_of_key_value_list kv_list
+      |> CharTrie.keys
+      |> List.sort compare
+    in
+    let expect =
+      List.map fst kv_list
+      |> List.sort compare
+    in
+    expect = actual)
+
+  ; Test.make ~name:"data"
+    (list (pair trie_key int)) (fun kv_list ->
+    assume_unique_keys kv_list;
+    let actual =
+      trie_of_key_value_list kv_list
+      |> CharTrie.data
+      |> List.sort compare
+    in
+    let expect =
+      List.map snd kv_list
       |> List.sort compare
     in
     expect = actual) ]

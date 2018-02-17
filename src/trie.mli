@@ -17,7 +17,7 @@
     arbitrary type [M.key], the following functor constructs a new map
     over type [M.key list]. *)
 
-module type S = sig
+module type M = sig
   type key
   type +'a t
   val empty : 'a t
@@ -34,4 +34,11 @@ module type S = sig
   val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
 end
 
-module Make(M : S) : (S with type key = M.key list)
+module type S = sig
+  include M
+
+  val keys : 'a t -> key list
+  val data : 'a t -> 'a list
+end
+
+module Make(M : M) : (S with type key = M.key list)

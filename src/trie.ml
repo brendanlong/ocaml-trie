@@ -22,7 +22,7 @@
     defined as soon as a map over the elements of the list is
     given. *)
 
-module type S = sig
+module type M = sig
   type key
   type +'a t
   val empty : 'a t
@@ -39,7 +39,14 @@ module type S = sig
   val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
 end
 
-module Make (M : S) = struct
+module type S = sig
+  include M
+
+  val keys : 'a t -> key list
+  val data : 'a t -> 'a list
+end
+
+module Make (M : M) = struct
 
   (*s Then a trie is just a tree-like structure, where a possible
       information is stored at the node (['a option]) and where the sons
@@ -164,4 +171,11 @@ module Make (M : S) = struct
     in
     comp a b
 
+  let keys t =
+    fold (fun key _ acc -> key :: acc) t []
+    |> List.rev
+
+  let data t =
+    fold (fun _ value acc -> value :: acc) t []
+    |> List.rev
 end
