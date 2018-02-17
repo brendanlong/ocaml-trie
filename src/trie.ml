@@ -30,10 +30,6 @@ module type M = sig
   val add : key -> 'a -> 'a t -> 'a t
   val find : key -> 'a t -> 'a
   val remove : key -> 'a t -> 'a t
-  val mem : key -> 'a t -> bool
-  val iter : (key -> 'a -> unit) -> 'a t -> unit
-  val map : ('a -> 'b) -> 'a t -> 'b t
-  val mapi : (key -> 'a -> 'b) -> 'a t -> 'b t
   val fold : (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
   val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
   val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
@@ -42,6 +38,10 @@ end
 module type S = sig
   include M
 
+  val mem : key -> 'a t -> bool
+  val iter : (key -> 'a -> unit) -> 'a t -> unit
+  val map : ('a -> 'b) -> 'a t -> 'b t
+  val mapi : (key -> 'a -> 'b) -> 'a t -> 'b t
   val keys : 'a t -> key list
   val data : 'a t -> 'a list
 end
@@ -117,28 +117,6 @@ module Make (M : M) = struct
       we have to reverse it with [List.rev] when the actual binding
       has to be passed to function [f]. *)
 
-  let rec map f = function
-    | Node (None,m)   -> Node (None, M.map (map f) m)
-    | Node (Some v,m) -> Node (Some (f v), M.map (map f) m)
-
-  let mapi f t =
-    let rec maprec revp = function
-      | Node (None,m) ->
-        Node (None, M.mapi (fun x -> maprec (x::revp)) m)
-      | Node (Some v,m) ->
-        Node (Some (f (List.rev revp) v), M.mapi (fun x -> maprec (x::revp)) m)
-    in
-    maprec [] t
-
-  let iter f t =
-    let rec traverse revp = function
-      | Node (None,m) ->
-        M.iter (fun x -> traverse (x::revp)) m
-      | Node (Some v,m) ->
-        f (List.rev revp) v; M.iter (fun x t -> traverse (x::revp) t) m
-    in
-    traverse [] t
-
   let fold f t acc =
     let rec traverse revp t acc = match t with
       | Node (None,m) ->
@@ -147,6 +125,17 @@ module Make (M : M) = struct
         f (List.rev revp) v (M.fold (fun x -> traverse (x::revp)) m acc)
     in
     traverse [] t acc
+
+  let map f t =
+    fold (fun key value acc ->
+      add key (f value) acc) t empty
+
+  let mapi f t =
+    fold (fun key value acc ->
+      add key (f key value) acc) t empty
+
+  let iter f t =
+    fold (fun key value () -> f key value) t ()
 
   let compare cmp a b =
     let rec comp a b = match a,b with
