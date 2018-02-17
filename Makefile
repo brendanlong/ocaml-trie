@@ -3,6 +3,7 @@ build:
 
 clean:
 	@jbuilder clean
+	@rm -rf _coverage bisect*.out
 
 coverage: clean
 	@BISECT_ENABLE=YES jbuilder runtest --dev
