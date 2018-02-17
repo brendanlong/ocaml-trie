@@ -3,7 +3,7 @@
 (executables
  ((names (test_trie))
   (modules (test_trie))
-  (libraries (trie oUnit))))
+  (libraries (trie qcheck))))
 
 (alias
  ((name runtest)

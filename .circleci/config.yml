@@ -22,7 +22,7 @@ jobs:
           command: opam config exec make
       - run:
           name: Install OCaml test dependencies
-          command: opam install -y oUnit
+          command: opam install -y qcheck=0.7
       - run:
           name: Test
           command: opam config exec make coverage
