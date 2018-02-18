@@ -55,6 +55,16 @@ let () =
     (fun () ->
       List.map strings ~f:(fun (key, _) ->
         let key = String.to_list key in
-        CharTrie.find_approximate ~max_differences:1 key trie)) ]
+        CharTrie.find_approximate ~max_differences:1 key trie))
+  ; Bench.Test.create ~name:"lookup keys with find_approximate ~max_differences:2 in trie"
+    (fun () ->
+      List.map strings ~f:(fun (key, _) ->
+        let key = String.to_list key in
+        CharTrie.find_approximate ~max_differences:2 key trie))
+  ; Bench.Test.create ~name:"lookup keys with find_approximate ~max_differences:3 in trie"
+    (fun () ->
+      List.map strings ~f:(fun (key, _) ->
+        let key = String.to_list key in
+        CharTrie.find_approximate ~max_differences:3 key trie)) ]
   |> Bench.make_command
   |> Command.run
