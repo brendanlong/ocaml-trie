@@ -287,6 +287,66 @@ let suite =
         in
         let found = CharTrie.find_approximate ~max_differences key trie in
         List.mem value found)
+        kv_list)
+
+  ; Test.make ~name:"find_approximate missing prefix too many differences"
+    (pair (medium_list (trie_key_with_size 6)) (int_range 1 5))
+    (fun (key_list, drop_prefix) ->
+      List.iter (fun key -> assume (List.length key >= drop_prefix)) key_list;
+      let kv_list = List.map (fun key -> key, key) key_list in
+      assume_unique_keys kv_list;
+      let trie = trie_of_key_value_list kv_list in
+      List.for_all (fun (key, value) ->
+        let key =
+          let a = Array.of_list key in
+          Array.sub a drop_prefix ((Array.length a) - drop_prefix)
+          |> Array.to_list
+        in
+        let found = CharTrie.find_approximate
+            ~max_differences:(drop_prefix - 1) key trie in
+        not (List.mem value found))
+        kv_list)
+
+  ; Test.make ~name:"find_approximate missing suffix too many differences"
+    (pair (medium_list (trie_key_with_size 6)) (int_range 1 5))
+    (fun (key_list, drop_prefix) ->
+      List.iter (fun key -> assume (List.length key >= drop_prefix)) key_list;
+      let kv_list = List.map (fun key -> key, key) key_list in
+      assume_unique_keys kv_list;
+      let trie = trie_of_key_value_list kv_list in
+      List.for_all (fun (key, value) ->
+        let key =
+          let a = Array.of_list key in
+          Array.sub a 0 ((Array.length a) - drop_prefix)
+          |> Array.to_list
+        in
+        let found = CharTrie.find_approximate
+            ~max_differences:(drop_prefix - 1) key trie in
+        not (List.mem value found))
+        kv_list)
+
+  ; Test.make ~name:"find_approximate random changes too many differences"
+    (pair (medium_list (trie_key_with_size 6))
+       (list_of_size (Gen.int_range 0 5) (int_range 0 4)))
+    (fun (key_list, change_indexes) ->
+      assume (not (List.exists (fun key -> key = []) key_list));
+      assume (change_indexes <> []);
+      assume (list_values_are_unique change_indexes);
+      let kv_list = List.map (fun key -> key, key) key_list in
+      assume_unique_keys kv_list;
+      let max_differences = (List.length change_indexes) - 1 in
+      let trie = trie_of_key_value_list kv_list in
+      List.for_all (fun (key, value) ->
+        let key =
+          let a = Array.of_list key in
+          List.iter (fun i ->
+            assume (Array.length a > i);
+            Array.set a i 'x')
+            change_indexes;
+          Array.to_list a
+        in
+        let found = CharTrie.find_approximate ~max_differences key trie in
+        not (List.mem value found))
         kv_list) ]
 
 let () =
