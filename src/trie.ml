@@ -196,15 +196,15 @@ module Make (M : M) = struct
       else
         with_difference (find_approximate remaining_key t)
         |> M.fold (fun link_key next acc ->
-          let max_differences =
-            if link_key = current_key
-            then max_differences
-            else max_differences - 1
+          (let max_differences =
+            if current_key = link_key then
+              max_differences
+            else
+              max_differences - 1
           in
-          if max_differences >= 0 then
-            find_approximate ~max_differences remaining_key next
-            @ find_approximate ~max_differences key next
-            @ acc
-          else acc)
+          find_approximate ~max_differences remaining_key next)
+          @ let max_differences = max_differences - 1 in
+          find_approximate ~max_differences key next
+          @ acc)
           links
 end
