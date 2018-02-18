@@ -11,10 +11,9 @@ module CharTrie = Trie.Make(CharMap)
 let () =
   let strings =
     let state = Caml.Random.State.make_self_init () in
-    let string_gen = QCheck.string in
-    let int_gen = QCheck.int in
-    List.init 100 ~f:(fun _ ->
-      string_gen.gen state, int_gen.gen state)
+    let string_gen = QCheck.small_printable_string in
+    List.init 500 ~f:(fun _ ->
+      string_gen.gen state, ())
   in
   let map = String.Map.of_alist_multi strings in
   let hash_table = String.Table.of_alist_multi strings in
