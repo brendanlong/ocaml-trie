@@ -10,9 +10,15 @@ let () =
   in
   let map = String.Map.of_alist_multi strings in
   let hash_table = String.Table.of_alist_multi strings in
-  let trie = List.fold strings ~init:Char_trie.empty ~f:(fun acc (key, value) ->
-      let key = String.to_list key in
-      Char_trie.add key value acc)
+  let trie = List.fold strings ~init:Char_trie.empty
+      ~f:(fun acc (key, value) ->
+        let key = String.to_list key in
+        Char_trie.add key value acc)
+  in
+  let fast_trie = List.fold strings ~init:Fast_char_trie.empty
+      ~f:(fun acc (key, value) ->
+        let key = String.to_list key in
+        Fast_char_trie.add key value acc)
   in
   [ Bench.Test.create ~name:"populate map"
       (fun () ->
@@ -25,6 +31,11 @@ let () =
       List.fold strings ~init:Char_trie.empty ~f:(fun acc (key, value) ->
         let key = String.to_list key in
         Char_trie.add key value acc))
+  ; Bench.Test.create ~name:"populate fast trie"
+    (fun () ->
+      List.fold strings ~init:Fast_char_trie.empty ~f:(fun acc (key, value) ->
+        let key = String.to_list key in
+        Fast_char_trie.add key value acc))
   ; Bench.Test.create ~name:"lookup keys in map"
     (fun () ->
       List.map strings ~f:(fun (key, _) ->
@@ -38,25 +49,50 @@ let () =
       List.map strings ~f:(fun (key, _) ->
         let key = String.to_list key in
         Char_trie.find key trie))
-  ; Bench.Test.create ~name:"lookup keys with find_approximate ~max_differences:0 in trie"
+  ; Bench.Test.create ~name:"lookup keys in fast trie"
+    (fun () ->
+      List.map strings ~f:(fun (key, _) ->
+        let key = String.to_list key in
+        Fast_char_trie.find key fast_trie))
+  ; Bench.Test.create ~name:"trie find_approximate ~max_differences:0 in trie"
     (fun () ->
       List.map strings ~f:(fun (key, _) ->
         let key = String.to_list key in
         Char_trie.find_approximate ~max_differences:0 key trie))
-  ; Bench.Test.create ~name:"lookup keys with find_approximate ~max_differences:1 in trie"
+  ; Bench.Test.create ~name:"trie find_approximate ~max_differences:1 in trie"
     (fun () ->
       List.map strings ~f:(fun (key, _) ->
         let key = String.to_list key in
         Char_trie.find_approximate ~max_differences:1 key trie))
-  ; Bench.Test.create ~name:"lookup keys with find_approximate ~max_differences:2 in trie"
+  ; Bench.Test.create ~name:"trie find_approximate ~max_differences:2 in trie"
     (fun () ->
       List.map strings ~f:(fun (key, _) ->
         let key = String.to_list key in
         Char_trie.find_approximate ~max_differences:2 key trie))
-  ; Bench.Test.create ~name:"lookup keys with find_approximate ~max_differences:3 in trie"
+  ; Bench.Test.create ~name:"trie find_approximate ~max_differences:3 in trie"
     (fun () ->
       List.map strings ~f:(fun (key, _) ->
         let key = String.to_list key in
-        Char_trie.find_approximate ~max_differences:3 key trie)) ]
+        Char_trie.find_approximate ~max_differences:3 key trie))
+  ; Bench.Test.create ~name:"fast trie find_approximate ~max_differences:0 in trie"
+    (fun () ->
+      List.map strings ~f:(fun (key, _) ->
+        let key = String.to_list key in
+        Fast_char_trie.find_approximate ~max_differences:0 key fast_trie))
+  ; Bench.Test.create ~name:"fast trie find_approximate ~max_differences:1 in trie"
+    (fun () ->
+      List.map strings ~f:(fun (key, _) ->
+        let key = String.to_list key in
+        Fast_char_trie.find_approximate ~max_differences:1 key fast_trie))
+  ; Bench.Test.create ~name:"fast trie find_approximate ~max_differences:2 in trie"
+    (fun () ->
+      List.map strings ~f:(fun (key, _) ->
+        let key = String.to_list key in
+        Fast_char_trie.find_approximate ~max_differences:2 key fast_trie))
+  ; Bench.Test.create ~name:"fast trie find_approximate ~max_differences:3 in trie"
+    (fun () ->
+      List.map strings ~f:(fun (key, _) ->
+        let key = String.to_list key in
+        Fast_char_trie.find_approximate ~max_differences:3 key fast_trie)) ]
   |> Bench.make_command
   |> Command.run

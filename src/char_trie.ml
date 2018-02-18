@@ -1,6 +1,3 @@
-module CharMap = Map.Make(struct
-    type t = char
-    let compare = Char.compare
-  end)
+module Char_map = Map.Make(Char)
 
-include Trie.Make(CharMap)
+include Trie.Make(Char_map)
