@@ -2,13 +2,6 @@
    words with approximate matches. *)
 open Printf
 
-module CharMap = Map.Make(struct
-    type t = char
-    let compare = Char.compare
-  end)
-
-module CharTrie = Trie.Make(CharMap)
-
 let string_to_list s =
   let a = Array.make (String.length s) ' ' in
   String.iteri (fun i c ->
@@ -39,8 +32,8 @@ let () =
     let trie =
       List.fold_left (fun acc line ->
         let key = string_to_list line in
-        CharTrie.add key line acc)
-        CharTrie.empty
+        Char_trie.add key line acc)
+        Char_trie.empty
         lines
     in
     while true do
@@ -52,7 +45,7 @@ let () =
         let max_differences = int_of_string max_differences in
         let matches =
           let key = string_to_list word in
-          CharTrie.find_approximate ~max_differences key trie
+          Char_trie.find_approximate ~max_differences key trie
           |> List.sort_uniq compare
         in
         String.concat "\n" matches

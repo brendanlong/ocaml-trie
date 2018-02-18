@@ -1,15 +1,8 @@
-module CharMap = Map.Make(struct
-    type t = char
-    let compare = Char.compare
-  end)
-
-module CharTrie = Trie.Make(CharMap)
-
-let trie_of_key_value_list (type a) : (CharTrie.key * a) list -> a CharTrie.t =
+let trie_of_key_value_list (type a) : (Char_trie.key * a) list -> a Char_trie.t =
   fun l ->
     List.fold_left (fun acc (key, value) ->
-      CharTrie.add key value acc)
-      CharTrie.empty l
+      Char_trie.add key value acc)
+      Char_trie.empty l
 
 let trie_key_with_size max =
   QCheck.(list_of_size (Gen.int_bound max) char)
@@ -22,7 +15,7 @@ let medium_list x =
 let list_values_are_unique l =
   List.length (List.sort_uniq compare l) = List.length l
 
-let assume_unique_keys (type a) : (CharTrie.key * a) list -> unit =
+let assume_unique_keys (type a) : (Char_trie.key * a) list -> unit =
   fun kv_list ->
     let keys = List.map fst kv_list in
     QCheck.assume (list_values_are_unique keys)
@@ -30,34 +23,34 @@ let assume_unique_keys (type a) : (CharTrie.key * a) list -> unit =
 let suite =
   let open QCheck in
   [ Test.make ~name:"empty trie is empty"
-      ~count:1 unit (fun () -> CharTrie.(is_empty empty))
+      ~count:1 unit (fun () -> Char_trie.(is_empty empty))
 
   ; Test.make ~name: "empty trie mem always false"
-      (list char) (fun key -> not CharTrie.(mem key empty))
+      (list char) (fun key -> not Char_trie.(mem key empty))
 
   ; Test.make ~name:"empty trie find always raises"
     (list char) (fun key ->
     try
-      ignore CharTrie.(find key empty);
+      ignore Char_trie.(find key empty);
       false
     with Not_found -> true)
 
   ; Test.make ~name:"empty trie remove returns empty trie"
     (list char) (fun key ->
-    CharTrie.(remove key empty |> equal (=) empty))
+    Char_trie.(remove key empty |> equal (=) empty))
 
   ; Test.make ~name:"non-empty trie is not empty"
     (list (pair trie_key int64)) (fun kv_list ->
     assume (kv_list <> []);
     let trie = trie_of_key_value_list kv_list in
-    not (CharTrie.is_empty trie))
+    not (Char_trie.is_empty trie))
 
   ; Test.make ~name:"trie mem all keys"
     (list (pair trie_key bool)) (fun kv_list ->
     assume (kv_list <> []);
     let trie = trie_of_key_value_list kv_list in
     List.for_all (fun (key, _) ->
-      CharTrie.mem key trie) kv_list)
+      Char_trie.mem key trie) kv_list)
 
   ; Test.make ~name:"trie find all keys"
     (list (pair trie_key int64)) (fun kv_list ->
@@ -65,50 +58,50 @@ let suite =
     assume_unique_keys kv_list;
     let trie = trie_of_key_value_list kv_list in
     List.for_all (fun (key, value) ->
-      CharTrie.find key trie = value) kv_list)
+      Char_trie.find key trie = value) kv_list)
 
   ; Test.make ~name:"trie minus first key is not equal"
     (list (pair trie_key bool)) (fun kv_list ->
     assume (kv_list <> []);
     let trie1 = trie_of_key_value_list kv_list in
     let (key, _) = List.hd kv_list in
-    let trie2 = CharTrie.remove key trie1 in
-    not (CharTrie.equal (=) trie1 trie2))
+    let trie2 = Char_trie.remove key trie1 in
+    not (Char_trie.equal (=) trie1 trie2))
 
   ; Test.make ~name:"trie minus first key compares <> original trie"
     (list (pair trie_key bool)) (fun kv_list ->
     assume (kv_list <> []);
     let trie1 = trie_of_key_value_list kv_list in
     let (key, _) = List.hd kv_list in
-    let trie2 = CharTrie.remove key trie1 in
-    CharTrie.compare compare trie1 trie2 <> 0
-    && CharTrie.compare compare trie2 trie1 <> 0)
+    let trie2 = Char_trie.remove key trie1 in
+    Char_trie.compare compare trie1 trie2 <> 0
+    && Char_trie.compare compare trie2 trie1 <> 0)
 
   ; Test.make ~name:"trie minus first key compare is ordered"
     (list (pair trie_key bool)) (fun kv_list ->
     assume (kv_list <> []);
     let trie1 = trie_of_key_value_list kv_list in
     let (key, _) = List.hd kv_list in
-    let trie2 = CharTrie.remove key trie1 in
-    CharTrie.compare compare trie1 trie2
-    <> CharTrie.compare compare trie2 trie1)
+    let trie2 = Char_trie.remove key trie1 in
+    Char_trie.compare compare trie1 trie2
+    <> Char_trie.compare compare trie2 trie1)
 
   ; Test.make ~name:"trie without first key not mem first key"
     (list (pair trie_key bool)) (fun kv_list ->
     assume (kv_list <> []);
     let trie = trie_of_key_value_list kv_list in
     let (key, _) = List.hd kv_list in
-    let trie = CharTrie.remove key trie in
-    not (CharTrie.mem key trie))
+    let trie = Char_trie.remove key trie in
+    not (Char_trie.mem key trie))
 
   ; Test.make ~name:"trie without first key not find first key"
     (list (pair trie_key bool)) (fun kv_list ->
     assume (kv_list <> []);
     let trie = trie_of_key_value_list kv_list in
     let (key, _) = List.hd kv_list in
-    let trie = CharTrie.remove key trie in
+    let trie = Char_trie.remove key trie in
     try
-      ignore (CharTrie.find key trie);
+      ignore (Char_trie.find key trie);
       false
     with Not_found -> true)
 
@@ -116,20 +109,20 @@ let suite =
     (list (pair trie_key int)) (fun kv_list ->
     let trie1 = trie_of_key_value_list kv_list in
     let trie2 = trie_of_key_value_list kv_list in
-    CharTrie.equal (=) trie1 trie2)
+    Char_trie.equal (=) trie1 trie2)
 
   ; Test.make ~name:"same trie compares equal"
     (list (pair trie_key string)) (fun kv_list ->
     let trie1 = trie_of_key_value_list kv_list in
     let trie2 = trie_of_key_value_list kv_list in
-    CharTrie.compare String.compare trie1 trie2 = 0)
+    Char_trie.compare String.compare trie1 trie2 = 0)
 
   ; Test.make ~name:"list -> trie -> list (using fold) is same list"
     (list (pair trie_key string)) (fun kv_list ->
     assume_unique_keys kv_list;
     let trie = trie_of_key_value_list kv_list in
     let l =
-      CharTrie.fold (fun key value acc ->
+      Char_trie.fold (fun key value acc ->
         (key, value) :: acc) trie []
       |> List.sort compare
     in
@@ -140,7 +133,7 @@ let suite =
     assume_unique_keys kv_list;
     let trie = trie_of_key_value_list kv_list in
     let l = ref [] in
-    CharTrie.iter (fun key value ->
+    Char_trie.iter (fun key value ->
       l := (key, value) :: !l) trie;
     let l = List.sort compare !l in
     List.sort compare kv_list = l)
@@ -151,9 +144,9 @@ let suite =
     let actual =
       let trie =
         trie_of_key_value_list kv_list
-        |> CharTrie.map ((+) n)
+        |> Char_trie.map ((+) n)
       in
-      CharTrie.fold (fun key value acc ->
+      Char_trie.fold (fun key value acc ->
         (key, value) :: acc) trie []
       |> List.sort compare
     in
@@ -169,10 +162,10 @@ let suite =
     let actual =
       let trie =
         trie_of_key_value_list kv_list
-        |> CharTrie.mapi (fun key v ->
+        |> Char_trie.mapi (fun key v ->
           v - List.length key)
       in
-      CharTrie.fold (fun key value acc ->
+      Char_trie.fold (fun key value acc ->
         (key, value) :: acc) trie []
       |> List.sort compare
     in
@@ -187,7 +180,7 @@ let suite =
     assume_unique_keys kv_list;
     let actual =
       trie_of_key_value_list kv_list
-      |> CharTrie.keys
+      |> Char_trie.keys
       |> List.sort compare
     in
     let expect =
@@ -201,7 +194,7 @@ let suite =
     assume_unique_keys kv_list;
     let actual =
       trie_of_key_value_list kv_list
-      |> CharTrie.data
+      |> Char_trie.data
       |> List.sort compare
     in
     let expect =
@@ -212,14 +205,14 @@ let suite =
 
   ; Test.make ~name:"find_approximate finds nothing in empty trie"
     (pair trie_key small_int) (fun (key, max_differences) ->
-    CharTrie.(find_approximate ~max_differences key empty) = [])
+    Char_trie.(find_approximate ~max_differences key empty) = [])
 
   ; Test.make ~name:"find_approximate ~max_differences:0 = find"
     (list (pair trie_key int)) (fun kv_list ->
     assume_unique_keys kv_list;
     let trie = trie_of_key_value_list kv_list in
     List.for_all (fun (key, value) ->
-      CharTrie.find_approximate ~max_differences:0 key trie = [value])
+      Char_trie.find_approximate ~max_differences:0 key trie = [value])
       kv_list)
 
   ; Test.make ~name:"find_approximate >= find"
@@ -228,7 +221,7 @@ let suite =
       assume_unique_keys kv_list;
       let trie = trie_of_key_value_list kv_list in
       List.for_all (fun (key, value) ->
-        let found = CharTrie.find_approximate ~max_differences key trie in
+        let found = Char_trie.find_approximate ~max_differences key trie in
         List.mem value found)
         kv_list)
 
@@ -245,7 +238,7 @@ let suite =
           Array.sub a drop_prefix ((Array.length a) - drop_prefix)
           |> Array.to_list
         in
-        let found = CharTrie.find_approximate ~max_differences:drop_prefix key
+        let found = Char_trie.find_approximate ~max_differences:drop_prefix key
             trie in
         List.mem value found)
         kv_list)
@@ -263,7 +256,7 @@ let suite =
           Array.sub a 0 ((Array.length a) - drop_prefix)
           |> Array.to_list
         in
-        let found = CharTrie.find_approximate ~max_differences:drop_prefix key
+        let found = Char_trie.find_approximate ~max_differences:drop_prefix key
             trie in
         List.mem value found)
         kv_list)
@@ -291,7 +284,7 @@ let suite =
             change_indexes;
           Array.to_list a
         in
-        let found = CharTrie.find_approximate ~max_differences key trie in
+        let found = Char_trie.find_approximate ~max_differences key trie in
         List.mem value found)
         kv_list)
 
@@ -308,7 +301,7 @@ let suite =
           Array.sub a drop_prefix ((Array.length a) - drop_prefix)
           |> Array.to_list
         in
-        let found = CharTrie.find_approximate
+        let found = Char_trie.find_approximate
             ~max_differences:(drop_prefix - 1) key trie in
         not (List.mem value found))
         kv_list)
@@ -326,7 +319,7 @@ let suite =
           Array.sub a 0 ((Array.length a) - drop_prefix)
           |> Array.to_list
         in
-        let found = CharTrie.find_approximate
+        let found = Char_trie.find_approximate
             ~max_differences:(drop_prefix - 1) key trie in
         not (List.mem value found))
         kv_list)
@@ -356,7 +349,7 @@ let suite =
             change_indexes;
           Array.to_list a
         in
-        let found = CharTrie.find_approximate ~max_differences key trie in
+        let found = Char_trie.find_approximate ~max_differences key trie in
         not (List.mem value found))
         kv_list) ]
 
