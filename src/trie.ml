@@ -188,17 +188,23 @@ module Make (M : M) = struct
       | Some value -> value :: rest
       | None -> rest)
     | current_key :: remaining_key, Node (_, links) ->
-      with_difference (find_approximate remaining_key t)
-      |> M.fold (fun link_key next acc ->
-        let max_differences =
-          if link_key = current_key
-          then max_differences
-          else max_differences - 1
-        in
-        if max_differences >= 0 then
-          find_approximate ~max_differences remaining_key next
-          @ find_approximate ~max_differences key next
-          @ acc
-        else acc)
-        links
+      if max_differences = 0 then
+        try
+          M.find current_key links
+          |> find_approximate ~max_differences remaining_key
+        with Not_found -> []
+      else
+        with_difference (find_approximate remaining_key t)
+        |> M.fold (fun link_key next acc ->
+          let max_differences =
+            if link_key = current_key
+            then max_differences
+            else max_differences - 1
+          in
+          if max_differences >= 0 then
+            find_approximate ~max_differences remaining_key next
+            @ find_approximate ~max_differences key next
+            @ acc
+          else acc)
+          links
 end
