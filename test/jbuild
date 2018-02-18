@@ -1,12 +1,6 @@
 (jbuild_version 1)
 
 (executable
- ((name approx_match)
-  (public_name approx_match)
-  (modules (approx_match))
-  (libraries (trie unix))))
-
-(executable
  ((name test_trie)
   (modules (test_trie))
   (libraries (trie qcheck))))
