@@ -170,41 +170,42 @@ module Make (M : M) = struct
     fold (fun _ value acc -> value :: acc) t []
     |> List.rev
 
-  let rec find_approximate ~max_differences key t =
+  let find_approximate ~max_differences key t =
     assert (max_differences >= 0);
-    let with_difference f =
-      if max_differences = 0 then []
-      else f ~max_differences:(max_differences - 1)
-    in
-    match key, t with
-    | [], Node (value, links) ->
-      let rest = 
-        with_difference (fun ~max_differences ->
-          M.fold (fun _ next acc ->
-            find_approximate ~max_differences [] next @ acc)
-            links [])
-      in
-      (match value with
-      | Some value -> value :: rest
-      | None -> rest)
-    | current_key :: remaining_key, Node (_, links) ->
+    let rec find_approximate' ~max_differences key t acc =
       if max_differences = 0 then
         try
-          M.find current_key links
-          |> find_approximate ~max_differences remaining_key
-        with Not_found -> []
+          (find key t) :: acc
+        with Not_found ->
+          acc
       else
-        with_difference (find_approximate remaining_key t)
-        |> M.fold (fun link_key next acc ->
-          (let max_differences =
-            if current_key = link_key then
-              max_differences
-            else
-              max_differences - 1
+        let with_difference f =
+          f ~max_differences:(max_differences - 1)
+        in
+        match key, t with
+        | [], Node (value, links) ->
+          let acc =
+            match value with
+            | Some value -> value :: acc
+            | None -> acc
           in
-          find_approximate ~max_differences remaining_key next)
-          @ let max_differences = max_differences - 1 in
-          find_approximate ~max_differences key next
-          @ acc)
-          links
+          with_difference (fun ~max_differences ->
+            M.fold (fun _ next acc ->
+              find_approximate' ~max_differences [] next acc)
+              links
+              acc)
+        | current_key :: remaining_key, Node (_, links) ->
+          with_difference (find_approximate' remaining_key t acc)
+          |> M.fold (fun link_key next acc ->
+            (let max_differences =
+              if current_key = link_key then
+                max_differences
+              else
+                max_differences - 1
+            in
+            find_approximate' ~max_differences remaining_key next acc)
+            |> with_difference (find_approximate' key next))
+            links
+    in
+    find_approximate' ~max_differences key t []
 end
