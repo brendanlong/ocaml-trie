@@ -272,6 +272,7 @@ let suite =
     (pair (medium_list (trie_key_with_size 6))
        (list_of_size (Gen.int_range 0 5) (int_range 0 4)))
     (fun (key_list, change_indexes) ->
+      assume (list_values_are_unique change_indexes);
       let kv_list = List.map (fun key -> key, key) key_list in
       assume_unique_keys kv_list;
       let max_differences = List.length change_indexes in
@@ -281,7 +282,12 @@ let suite =
           let a = Array.of_list key in
           List.iter (fun i ->
             assume (Array.length a > i);
-            Array.set a i 'x')
+            let replace_with =
+              match Array.get a i with
+              | 'x' -> 'y'
+              | _ -> 'x'
+            in
+            Array.set a i replace_with)
             change_indexes;
           Array.to_list a
         in
@@ -341,7 +347,12 @@ let suite =
           let a = Array.of_list key in
           List.iter (fun i ->
             assume (Array.length a > i);
-            Array.set a i 'x')
+            let replace_with =
+              match Array.get a i with
+              | 'x' -> 'y'
+              | _ -> 'x'
+            in
+            Array.set a i replace_with)
             change_indexes;
           Array.to_list a
         in
