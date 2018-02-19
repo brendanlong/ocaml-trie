@@ -19,7 +19,7 @@
 
 module type M = sig
   type key
-  type +'a t
+  type 'a t
   val empty : 'a t
   val is_empty : 'a t -> bool
   val add : key -> 'a -> 'a t -> 'a t

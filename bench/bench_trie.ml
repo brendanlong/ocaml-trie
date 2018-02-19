@@ -20,15 +20,10 @@ let () =
         let key = String.to_list key in
         Char_trie.add key value acc)
   in
-  let fast_trie = List.fold kv_list ~init:Fast_char_trie.empty
+  let array_trie = List.fold kv_list ~init:Array_char_trie.empty
       ~f:(fun acc (key, value) ->
         let key = String.to_list key in
-        Fast_char_trie.add key value acc)
-  in
-  let list_trie = List.fold kv_list ~init:Char_list_trie.empty
-      ~f:(fun acc (key, value) ->
-        let key = String.to_list key in
-        Char_list_trie.add key value acc)
+        Array_char_trie.add key value acc)
   in
   [ Bench.Test.create ~name:"populate map"
       (fun () ->
@@ -41,16 +36,11 @@ let () =
       List.fold kv_list ~init:Char_trie.empty ~f:(fun acc (key, value) ->
         let key = String.to_list key in
         Char_trie.add key value acc))
-  ; Bench.Test.create ~name:"populate fast trie"
+  ; Bench.Test.create ~name:"populate array trie"
     (fun () ->
-      List.fold kv_list ~init:Fast_char_trie.empty ~f:(fun acc (key, value) ->
+      List.fold kv_list ~init:Array_char_trie.empty ~f:(fun acc (key, value) ->
         let key = String.to_list key in
-        Fast_char_trie.add key value acc))
-  ; Bench.Test.create ~name:"populate list trie"
-    (fun () ->
-      List.fold kv_list ~init:Fast_char_trie.empty ~f:(fun acc (key, value) ->
-        let key = String.to_list key in
-        Fast_char_trie.add key value acc))
+        Array_char_trie.add key value acc))
   ; Bench.Test.create ~name:"lookup keys map"
     (fun () ->
       List.map strings ~f:(Map.find map))
@@ -62,16 +52,11 @@ let () =
       List.map strings ~f:(fun key ->
         let key = String.to_list key in
         Char_trie.find key trie))
-  ; Bench.Test.create ~name:"lookup keys fast trie"
+  ; Bench.Test.create ~name:"lookup keys array trie"
     (fun () ->
       List.map strings ~f:(fun key ->
         let key = String.to_list key in
-        Fast_char_trie.find key fast_trie))
-  ; Bench.Test.create ~name:"lookup keys list trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Fast_char_trie.find key fast_trie))
+        Array_char_trie.find key array_trie))
   ; Bench.Test.create ~name:"find_approximate ~max_differences:0 trie"
     (fun () ->
       List.map strings ~f:(fun key ->
@@ -92,46 +77,26 @@ let () =
       List.map strings ~f:(fun key ->
         let key = String.to_list key in
         Char_trie.find_approximate ~max_differences:3 key trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:0 fast trie"
+  ; Bench.Test.create ~name:"find_approximate ~max_differences:0 array trie"
     (fun () ->
       List.map strings ~f:(fun key ->
         let key = String.to_list key in
-        Fast_char_trie.find_approximate ~max_differences:0 key fast_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:1 fast trie"
+        Array_char_trie.find_approximate ~max_differences:0 key array_trie))
+  ; Bench.Test.create ~name:"find_approximate ~max_differences:1 array trie"
     (fun () ->
       List.map strings ~f:(fun key ->
         let key = String.to_list key in
-        Fast_char_trie.find_approximate ~max_differences:1 key fast_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:2 fast trie"
+        Array_char_trie.find_approximate ~max_differences:1 key array_trie))
+  ; Bench.Test.create ~name:"find_approximate ~max_differences:2 array trie"
     (fun () ->
       List.map strings ~f:(fun key ->
         let key = String.to_list key in
-        Fast_char_trie.find_approximate ~max_differences:2 key fast_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:3 fast trie"
+        Array_char_trie.find_approximate ~max_differences:2 key array_trie))
+  ; Bench.Test.create ~name:"find_approximate ~max_differences:3 array trie"
     (fun () ->
       List.map strings ~f:(fun key ->
         let key = String.to_list key in
-        Fast_char_trie.find_approximate ~max_differences:3 key fast_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:0 list trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_list_trie.find_approximate ~max_differences:0 key list_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:1 list trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_list_trie.find_approximate ~max_differences:1 key list_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:2 list trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_list_trie.find_approximate ~max_differences:2 key list_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:3 list trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_list_trie.find_approximate ~max_differences:3 key list_trie))
+        Array_char_trie.find_approximate ~max_differences:3 key array_trie))
   ; Bench.Test.create ~name:"find_approximate ~max_differences:0 naive"
     (fun () ->
       List.map strings ~f:(fun key ->

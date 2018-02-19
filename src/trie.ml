@@ -24,7 +24,7 @@
 
 module type M = sig
   type key
-  type +'a t
+  type 'a t
   val empty : 'a t
   val is_empty : 'a t -> bool
   val add : key -> 'a -> 'a t -> 'a t
@@ -171,7 +171,8 @@ module Make (M : M) = struct
     |> List.rev
 
   let find_approximate ~max_differences key t =
-    assert (max_differences >= 0);
+    if max_differences < 0 then
+      invalid_arg "max_differences must be >= 0";
     let rec find_approximate' ~max_differences key t acc =
       if max_differences = 0 then
         try

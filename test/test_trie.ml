@@ -1,26 +1,26 @@
-let trie_of_key_value_list (type a) : (Char_trie.key * a) list -> a Char_trie.t =
-  fun l ->
-    List.fold_left (fun acc (key, value) ->
-      Char_trie.add key value acc)
-      Char_trie.empty l
-
-let trie_key_with_size max =
-  QCheck.(list_of_size (Gen.int_bound max) char)
-
-let trie_key = trie_key_with_size 10
-
 let medium_list x =
   QCheck.(list_of_size (Gen.int_bound 100) x)
 
 let list_values_are_unique l =
   List.length (List.sort_uniq compare l) = List.length l
 
-let assume_unique_keys (type a) : (Char_trie.key * a) list -> unit =
+let assume_unique_keys (type a) : (char list * a) list -> unit =
   fun kv_list ->
     let keys = List.map fst kv_list in
     QCheck.assume (list_values_are_unique keys)
 
-let suite =
+let make_tests m =
+  let module Char_trie = (val m : Trie.S with type key = char list) in
+  let trie_of_key_value_list (type a) : (Char_trie.key * a) list -> a Char_trie.t =
+    fun l ->
+      List.fold_left (fun acc (key, value) ->
+        Char_trie.add key value acc)
+        Char_trie.empty l
+  in
+  let trie_key_with_size max =
+    QCheck.(list_of_size (Gen.int_bound max) char)
+  in
+  let trie_key = trie_key_with_size 10 in
   let open QCheck in
   [ Test.make ~name:"empty trie is empty"
       ~count:1 unit (fun () -> Char_trie.(is_empty empty))
@@ -233,7 +233,7 @@ let suite =
       assume_unique_keys kv_list;
       let trie = trie_of_key_value_list kv_list in
       List.for_all (fun (key, value) ->
-        let key = 
+        let key =
           let a = Array.of_list key in
           Array.sub a drop_prefix ((Array.length a) - drop_prefix)
           |> Array.to_list
@@ -354,4 +354,10 @@ let suite =
         kv_list) ]
 
 let () =
-  QCheck_runner.run_tests_main suite
+  let tests =
+    [ (module Char_trie : Trie.S with type key = char list)
+    ; (module Array_char_trie : Trie.S with type key = char list) ]
+    |> List.map make_tests
+    |> List.concat
+  in
+  QCheck_runner.run_tests_main tests
