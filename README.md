@@ -6,34 +6,32 @@ This is forked from <https://www.lri.fr/~filliatr/software.en.html> for approxim
 Current benchmarks:
 
 ```
-┌───────────────────────────────────────────────┬────────────────┬──────────────┬───────────────┬───────────────┬────────────┐
-│ Name                                          │       Time/Run │      mWd/Run │      mjWd/Run │      Prom/Run │ Percentage │
-├───────────────────────────────────────────────┼────────────────┼──────────────┼───────────────┼───────────────┼────────────┤
-│ populate map                                  │       481.14us │      88.65kw │     1_867.09w │     1_867.09w │      0.04% │
-│ populate hash table                           │       178.15us │      10.61kw │     7_418.49w │     6_393.49w │      0.01% │
-│ populate trie                                 │       578.33us │     138.55kw │    11_034.72w │    11_034.72w │      0.04% │
-│ populate fast trie                            │     1_038.50us │     203.42kw │    12_190.13w │    12_190.13w │      0.08% │
-│ populate list trie                            │       803.12us │     203.42kw │    12_032.31w │    12_032.31w │      0.06% │
-│ lookup keys map                               │       181.31us │       5.00kw │        47.61w │        47.61w │      0.01% │
-│ lookup keys hash table                        │        43.38us │       5.00kw │        49.34w │        49.34w │            │
-│ lookup keys trie                              │       177.65us │      22.89kw │        17.82w │        17.82w │      0.01% │
-│ lookup keys fast trie                         │       245.06us │      42.74kw │        19.61w │        19.61w │      0.02% │
-│ lookup keys list trie                         │       200.56us │      42.74kw │        18.34w │        18.34w │      0.02% │
-│ find_approximate ~max_differences:0 trie      │       269.49us │      85.51kw │       531.27w │       531.27w │      0.02% │
-│ find_approximate ~max_differences:1 trie      │    20_494.76us │   2_446.14kw │    35_288.71w │    35_288.71w │      1.55% │
-│ find_approximate ~max_differences:2 trie      │   233_892.42us │  39_845.03kw │   227_983.00w │   227_983.00w │     17.66% │
-│ find_approximate ~max_differences:3 trie      │ 1_073_743.82us │ 237_352.98kw │   839_227.00w │   839_227.00w │     81.07% │
-│ find_approximate ~max_differences:0 fast trie │       340.90us │     105.36kw │       645.79w │       645.79w │      0.03% │
-│ find_approximate ~max_differences:1 fast trie │    22_532.32us │   3_228.67kw │    35_865.35w │    35_865.35w │      1.70% │
-│ find_approximate ~max_differences:2 fast trie │   266_948.38us │  51_629.14kw │   230_518.00w │   230_518.00w │     20.16% │
-│ find_approximate ~max_differences:3 fast trie │ 1_142_019.75us │ 285_542.86kw │   842_896.00w │   842_896.00w │     86.23% │
-│ find_approximate ~max_differences:0 list trie │     1_036.10us │     331.53kw │     1_889.15w │     1_889.15w │      0.08% │
-│ find_approximate ~max_differences:1 list trie │    38_308.43us │  10_671.63kw │    38_606.55w │    38_606.55w │      2.89% │
-│ find_approximate ~max_differences:2 list trie │   316_325.46us │  88_330.19kw │   240_746.30w │   240_746.30w │     23.88% │
-│ find_approximate ~max_differences:3 list trie │ 1_324_436.43us │ 408_636.18kw │   880_151.00w │   880_151.00w │    100.00% │
-│ find_approximate ~max_differences:0 naive     │   271_495.15us │  53_951.27kw │ 3_324_284.80w │ 3_324_284.80w │     20.50% │
-│ find_approximate ~max_differences:1 naive     │   248_819.13us │  53_951.27kw │ 3_325_937.80w │ 3_325_937.80w │     18.79% │
-│ find_approximate ~max_differences:2 naive     │   222_008.38us │  53_951.23kw │ 3_305_334.10w │ 3_305_334.10w │     16.76% │
-│ find_approximate ~max_differences:3 naive     │   221_672.88us │  53_951.18kw │ 3_316_275.80w │ 3_316_275.80w │     16.74% │
-└───────────────────────────────────────────────┴────────────────┴──────────────┴───────────────┴───────────────┴────────────┘
+┌────────────────────────────────────────────────┬──────────────┬──────────────┬───────────────┬───────────────┬────────────┐
+│ Name                                           │     Time/Run │      mWd/Run │      mjWd/Run │      Prom/Run │ Percentage │
+├────────────────────────────────────────────────┼──────────────┼──────────────┼───────────────┼───────────────┼────────────┤
+│ populate map                                   │     709.08us │      86.39kw │     1_719.23w │     1_719.23w │      0.08% │
+│ populate hash table                            │     182.35us │      10.69kw │     7_501.45w │     6_476.45w │      0.02% │
+│ populate trie                                  │     642.07us │     114.69kw │    10_118.66w │    10_118.66w │      0.08% │
+│ populate array trie                            │   3_261.10us │     471.52kw │    28_113.42w │    28_113.42w │      0.38% │
+│ lookup keys map                                │     322.66us │       5.00kw │        50.41w │        50.41w │      0.04% │
+│ lookup keys hash table                         │      55.18us │       5.00kw │        48.33w │        48.33w │            │
+│ lookup keys trie                               │     153.99us │      23.02kw │        18.87w │        18.87w │      0.02% │
+│ lookup keys array trie                         │     147.99us │      33.58kw │        18.46w │        18.46w │      0.02% │
+│ find_approximate ~max_differences:0 trie       │     213.97us │      32.02kw │       215.90w │       215.90w │      0.03% │
+│ find_approximate ~max_differences:1 trie       │  20_691.63us │     916.04kw │    30_535.55w │    30_535.55w │      2.44% │
+│ find_approximate ~max_differences:2 trie       │ 233_839.29us │  16_766.60kw │   213_162.90w │   213_162.90w │     27.59% │
+│ find_approximate ~max_differences:3 trie       │ 847_407.53us │ 122_534.26kw │   821_770.00w │   821_770.00w │    100.00% │
+│ find_approximate ~max_differences:0 array trie │     206.26us │      42.58kw │       281.79w │       281.79w │      0.02% │
+│ find_approximate ~max_differences:1 array trie │  19_392.88us │   1_928.79kw │    33_032.44w │    33_032.44w │      2.29% │
+│ find_approximate ~max_differences:2 array trie │ 210_971.73us │  20_073.43kw │   212_757.40w │   212_757.40w │     24.90% │
+│ find_approximate ~max_differences:3 array trie │ 840_106.39us │ 143_431.08kw │   833_008.50w │   833_008.50w │     99.14% │
+│ find_approximate ~max_differences:0 naive      │ 277_164.32us │  54_473.31kw │ 3_308_691.90w │ 3_308_691.90w │     32.71% │
+│ find_approximate ~max_differences:1 naive      │ 264_931.17us │  54_473.36kw │ 3_310_640.60w │ 3_310_640.60w │     31.26% │
+│ find_approximate ~max_differences:2 naive      │ 369_660.00us │  54_473.29kw │ 3_308_716.00w │ 3_308_716.00w │     43.62% │
+│ find_approximate ~max_differences:3 naive      │ 306_107.95us │  54_473.27kw │ 3_298_117.50w │ 3_298_117.50w │     36.12% │
+└────────────────────────────────────────────────┴──────────────┴──────────────┴───────────────┴───────────────┴────────────┘
 ```
+
+ - `trie` is using `Trie.Make(Map.Make(Char))`
+ - `array trie` is using a sorted-array map for the nodes (much slower to setup, faster due to better cache usage)
+ - `naive` is just looping through every word and checking the levenshtein distance
