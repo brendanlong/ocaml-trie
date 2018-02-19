@@ -8,6 +8,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Update opam package list
+          command: opam update
+      - run:
           name: Pin packages
           command: |
             opam pin add -y -n trie .
@@ -22,7 +25,7 @@ jobs:
           command: opam config exec make
       - run:
           name: Install OCaml test dependencies
-          command: opam install -y qcheck=0.7
+          command: opam install -y base=v0.9.3 qcheck=0.7
       - run:
           name: Test
           command: opam config exec make coverage

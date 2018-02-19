@@ -3,7 +3,7 @@
 (executable
  ((name test_trie)
   (modules (test_trie))
-  (libraries (trie qcheck))))
+  (libraries (trie base levenshtein qcheck))))
 
 (alias
  ((name runtest)

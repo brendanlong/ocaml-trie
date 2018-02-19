@@ -18,7 +18,7 @@ let make_tests m =
         Char_trie.empty l
   in
   let trie_key_with_size max =
-    QCheck.(list_of_size (Gen.int_bound max) char)
+    QCheck.(list_of_size (Gen.int_bound max) printable_char)
   in
   let trie_key = trie_key_with_size 10 in
   let open QCheck in
@@ -351,7 +351,28 @@ let make_tests m =
         in
         let found = Char_trie.find_approximate ~max_differences key trie in
         not (List.mem value found))
-        kv_list) ]
+        kv_list)
+
+  ; Test.make ~name:"find_approximate exact levenshtein distance"
+    (pair (trie_key) (trie_key))
+    (fun (k1, k2) ->
+      let s1 = Base.String.of_char_list k1 in
+      let s2 = Base.String.of_char_list k2 in
+      let distance = Levenshtein.String.distance s1 s2 in
+      let trie = Char_trie.(empty |> add k1 k1) in
+      Char_trie.find_approximate ~max_differences:distance k2 trie
+      |> Base.List.dedup = [ k1 ])
+
+  ; Test.make ~name:"find_approximate levenshtein distance minus one"
+    (pair (trie_key) (trie_key))
+    (fun (k1, k2) ->
+      let s1 = Base.String.of_char_list k1 in
+      let s2 = Base.String.of_char_list k2 in
+      let distance = Levenshtein.String.distance s1 s2 in
+      assume (distance > 0);
+      let trie = Char_trie.(empty |> add k1 k1) in
+      Char_trie.find_approximate ~max_differences:(distance - 1)
+        k2 trie = [ ]) ]
 
 let () =
   let tests =
