@@ -9,8 +9,14 @@ let naive_search ~max_differences key =
 let () =
   let strings =
     let state = Caml.Random.State.make_self_init () in
-    let string_gen = QCheck.small_printable_string in
-    List.init 1000 ~f:(fun _ -> string_gen.gen state)
+    let string_gen = QCheck.(printable_string_of_size Gen.(int_bound 37)) in
+    List.init 1000 ~f:(fun _ ->
+      string_gen.gen state |> String.lowercase)
+  in
+  let lookup_strings = Array.of_list strings in
+  let random_key () =
+    let i = Random.int (Array.length lookup_strings - 1) in
+    Array.get lookup_strings i
   in
   let kv_list = List.map strings ~f:(fun key -> key, ()) in
   let map = String.Map.of_alist_multi kv_list in
@@ -43,75 +49,51 @@ let () =
         Array_char_trie.add key value acc))
   ; Bench.Test.create ~name:"lookup keys map"
     (fun () ->
-      List.map strings ~f:(Map.find map))
+      random_key ()
+      |> Map.find map)
   ; Bench.Test.create ~name:"lookup keys hash table"
     (fun () ->
-      List.map strings ~f:(String.Table.find hash_table))
+      random_key ()
+      |> String.Table.find hash_table)
   ; Bench.Test.create ~name:"lookup keys trie"
     (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_trie.find key trie))
+      let key =
+        random_key ()
+        |> String.to_list
+      in
+      Char_trie.find key trie)
   ; Bench.Test.create ~name:"lookup keys array trie"
     (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Array_char_trie.find key array_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:0 trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_trie.find_approximate ~max_differences:0 key trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:1 trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_trie.find_approximate ~max_differences:1 key trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:2 trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_trie.find_approximate ~max_differences:2 key trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:3 trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Char_trie.find_approximate ~max_differences:3 key trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:0 array trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Array_char_trie.find_approximate ~max_differences:0 key array_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:1 array trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Array_char_trie.find_approximate ~max_differences:1 key array_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:2 array trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Array_char_trie.find_approximate ~max_differences:2 key array_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:3 array trie"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        let key = String.to_list key in
-        Array_char_trie.find_approximate ~max_differences:3 key array_trie))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:0 naive"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        naive_search ~max_differences:0 key strings))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:1 naive"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        naive_search ~max_differences:1 key strings))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:2 naive"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        naive_search ~max_differences:2 key strings))
-  ; Bench.Test.create ~name:"find_approximate ~max_differences:3 naive"
-    (fun () ->
-      List.map strings ~f:(fun key ->
-        naive_search ~max_differences:3 key strings)) ]
+      let key =
+        random_key ()
+        |> String.to_list
+      in
+      Array_char_trie.find key array_trie)
+  ; Bench.Test.create_indexed ~args:[ 0 ; 1 ; 2 ; 3 ]
+    ~name:"find_approximate trie ~max_differences"
+    (fun max_differences ->
+      stage (fun () ->
+        let key =
+          random_key ()
+          |> String.to_list
+        in
+        Char_trie.find_approximate ~max_differences key trie))
+  ; Bench.Test.create_indexed ~args:[ 0 ; 1 ; 2 ; 3 ]
+    ~name:"find_approximate array trie ~max_differences"
+    (fun max_differences ->
+      stage (fun () ->
+        let key =
+          random_key ()
+          |> String.to_list
+        in
+        Array_char_trie.find_approximate ~max_differences key array_trie))
+  ; Bench.Test.create_indexed ~args:[ 0 ; 1 ; 2 ; 3 ]
+    ~name:"find_approximate naive ~max_differences"
+    (fun max_differences ->
+      stage (fun () ->
+        let key =
+          random_key ()
+        in
+        naive_search ~max_differences:0 key strings)) ]
   |> Bench.make_command
   |> Command.run

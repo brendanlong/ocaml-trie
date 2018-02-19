@@ -6,30 +6,30 @@ This is forked from <https://www.lri.fr/~filliatr/software.en.html> for approxim
 Current benchmarks:
 
 ```
-┌────────────────────────────────────────────────┬──────────────┬──────────────┬───────────────┬───────────────┬────────────┐
-│ Name                                           │     Time/Run │      mWd/Run │      mjWd/Run │      Prom/Run │ Percentage │
-├────────────────────────────────────────────────┼──────────────┼──────────────┼───────────────┼───────────────┼────────────┤
-│ populate map                                   │     709.08us │      86.39kw │     1_719.23w │     1_719.23w │      0.08% │
-│ populate hash table                            │     182.35us │      10.69kw │     7_501.45w │     6_476.45w │      0.02% │
-│ populate trie                                  │     642.07us │     114.69kw │    10_118.66w │    10_118.66w │      0.08% │
-│ populate array trie                            │   3_261.10us │     471.52kw │    28_113.42w │    28_113.42w │      0.38% │
-│ lookup keys map                                │     322.66us │       5.00kw │        50.41w │        50.41w │      0.04% │
-│ lookup keys hash table                         │      55.18us │       5.00kw │        48.33w │        48.33w │            │
-│ lookup keys trie                               │     153.99us │      23.02kw │        18.87w │        18.87w │      0.02% │
-│ lookup keys array trie                         │     147.99us │      33.58kw │        18.46w │        18.46w │      0.02% │
-│ find_approximate ~max_differences:0 trie       │     213.97us │      32.02kw │       215.90w │       215.90w │      0.03% │
-│ find_approximate ~max_differences:1 trie       │  20_691.63us │     916.04kw │    30_535.55w │    30_535.55w │      2.44% │
-│ find_approximate ~max_differences:2 trie       │ 233_839.29us │  16_766.60kw │   213_162.90w │   213_162.90w │     27.59% │
-│ find_approximate ~max_differences:3 trie       │ 847_407.53us │ 122_534.26kw │   821_770.00w │   821_770.00w │    100.00% │
-│ find_approximate ~max_differences:0 array trie │     206.26us │      42.58kw │       281.79w │       281.79w │      0.02% │
-│ find_approximate ~max_differences:1 array trie │  19_392.88us │   1_928.79kw │    33_032.44w │    33_032.44w │      2.29% │
-│ find_approximate ~max_differences:2 array trie │ 210_971.73us │  20_073.43kw │   212_757.40w │   212_757.40w │     24.90% │
-│ find_approximate ~max_differences:3 array trie │ 840_106.39us │ 143_431.08kw │   833_008.50w │   833_008.50w │     99.14% │
-│ find_approximate ~max_differences:0 naive      │ 277_164.32us │  54_473.31kw │ 3_308_691.90w │ 3_308_691.90w │     32.71% │
-│ find_approximate ~max_differences:1 naive      │ 264_931.17us │  54_473.36kw │ 3_310_640.60w │ 3_310_640.60w │     31.26% │
-│ find_approximate ~max_differences:2 naive      │ 369_660.00us │  54_473.29kw │ 3_308_716.00w │ 3_308_716.00w │     43.62% │
-│ find_approximate ~max_differences:3 naive      │ 306_107.95us │  54_473.27kw │ 3_298_117.50w │ 3_298_117.50w │     36.12% │
-└────────────────────────────────────────────────┴──────────────┴──────────────┴───────────────┴───────────────┴────────────┘
+┌────────────────────────────────────────────────┬────────────────┬─────────────┬─────────────┬─────────────┬────────────┐
+│ Name                                           │       Time/Run │     mWd/Run │    mjWd/Run │    Prom/Run │ Percentage │
+├────────────────────────────────────────────────┼────────────────┼─────────────┼─────────────┼─────────────┼────────────┤
+│ populate map                                   │   572_919.04ns │  90_512.87w │   1_888.87w │   1_888.87w │     13.82% │
+│ populate hash table                            │   203_260.31ns │  10_975.34w │   7_963.70w │   6_938.70w │      4.90% │
+│ populate trie                                  │ 1_718_170.10ns │ 277_668.54w │  88_706.80w │  88_706.80w │     41.45% │
+│ populate array trie                            │ 4_145_416.84ns │ 540_437.90w │ 105_178.14w │ 105_178.14w │    100.00% │
+│ lookup keys map                                │       222.42ns │       2.00w │             │             │            │
+│ lookup keys hash table                         │        98.03ns │       2.00w │             │             │            │
+│ lookup keys trie                               │       323.37ns │      59.46w │             │             │            │
+│ lookup keys array trie                         │       338.47ns │      72.15w │             │             │            │
+│ find_approximate trie ~max_differences:0       │       345.51ns │      68.45w │             │             │            │
+│ find_approximate trie ~max_differences:1       │    14_485.15ns │   1_102.91w │       0.65w │       0.65w │      0.35% │
+│ find_approximate trie ~max_differences:2       │   198_593.19ns │  19_394.85w │      10.89w │      10.89w │      4.79% │
+│ find_approximate trie ~max_differences:3       │   968_443.72ns │ 157_952.36w │     119.21w │     119.21w │     23.36% │
+│ find_approximate array trie ~max_differences:0 │       346.59ns │      81.12w │             │             │            │
+│ find_approximate array trie ~max_differences:1 │    13_187.24ns │   2_037.60w │       1.05w │       1.05w │      0.32% │
+│ find_approximate array trie ~max_differences:2 │   178_434.43ns │  24_090.49w │      13.03w │      13.03w │      4.30% │
+│ find_approximate array trie ~max_differences:3 │   868_875.12ns │ 187_760.13w │     150.36w │     150.36w │     20.96% │
+│ find_approximate naive ~max_differences:0      │   628_038.70ns │ 369_407.67w │   2_551.67w │   2_551.67w │     15.15% │
+│ find_approximate naive ~max_differences:1      │   640_129.20ns │ 385_537.75w │   2_631.62w │   2_631.62w │     15.44% │
+│ find_approximate naive ~max_differences:2      │   632_311.36ns │ 391_272.72w │   2_634.63w │   2_634.63w │     15.25% │
+│ find_approximate naive ~max_differences:3      │   631_650.84ns │ 376_681.94w │   2_612.15w │   2_612.15w │     15.24% │
+└────────────────────────────────────────────────┴────────────────┴─────────────┴─────────────┴─────────────┴────────────┘
 ```
 
  - `trie` is using `Trie.Make(Map.Make(Char))`
